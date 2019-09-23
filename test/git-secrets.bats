@@ -33,41 +33,14 @@ load test_helper
 @test "Scans all files when no file provided" {
   setup_bad_repo
   repo_run git-secrets --scan
-  [ $status -eq 1 ]
+  s=$status
+
+  echo "STATUS: $s"
+  [ $s -eq 1 ]
 }
 
 @test "Scans all files including history" {
   setup_bad_repo
-  repo_run git-secrets --scan-history
-  [ $status -eq 1 ]
-}
-
-@test "Scans all files when no file provided with secret in history" {
-  setup_bad_repo_history
-  repo_run git-secrets --scan
-  [ $status -eq 0 ]
-}
-
-@test "Scans all files including history with secret in history" {
-  setup_bad_repo_history
-  repo_run git-secrets --scan-history
-  [ $status -eq 1 ]
-}
-
-@test "Scans history with secrets distributed among branches in history" {
-  cd $TEST_REPO
-  echo '@todo' > $TEST_REPO/history_failure.txt
-  git add -A
-  git commit -m "Testing history"
-  echo 'todo' > $TEST_REPO/history_failure.txt
-  git add -A
-  git commit -m "Testing history"
-  git checkout -b testbranch
-  echo '@todo' > $TEST_REPO/history_failure.txt
-  git add -A
-  git commit -m "Testing history"
-  git checkout master
-  cd -
   repo_run git-secrets --scan-history
   [ $status -eq 1 ]
 }
@@ -369,15 +342,6 @@ load test_helper
   [ $status -eq 0 ]
 }
 
-@test "Require exact match for pattern with spaces triggered" {
-  cd $TEST_REPO
-  echo 'WHITE SPACE' > $TEST_REPO/ok.txt
-  git add -A
-  git commit -m "Testing pattern with all of the spaces"
-  repo_run git-secrets --scan
-  [ $status -eq 1 ]
-}
-
 @test "-d can only be used with --remove" {
   repo_run git-secrets --list -d
   [ $status -eq 1 ]
@@ -398,3 +362,8 @@ load test_helper
   repo_run git-secrets --list
   [ $status -eq 0 ]
 }
+
+@test "--version returns a version number" {
+  repo_run git-secrets -v
+  [ $status -eq 1 ]
+} 
